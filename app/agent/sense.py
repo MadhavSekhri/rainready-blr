@@ -18,6 +18,16 @@ from .geo import haversine_km
 IST = ZoneInfo("Asia/Kolkata")
 HOURS = 48
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+# Archived model forecasts: what the forecast *said* at the time (2022 onwards).
+HISTORICAL_FORECAST_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast"
+
+# Real Bengaluru heavy-rain / flooding episodes for replay. The replay window
+# starts at 00:00 IST on the given date and covers 48 hours.
+HISTORICAL_EVENTS = {
+    "2022-09-04": "4-5 Sep 2022: ORR, Bellandur and Sarjapur Road floods",
+    "2024-10-21": "21-22 Oct 2024: Yelahanka and Manyata area flooding",
+    "2025-05-18": "18-19 May 2025: Sai Layout, Silk Board and HSR waterlogging",
+}
 
 # Storm cells: (lat, lng, radius_km, peak_hour_offset, peak_mm_per_hr, duration_hr)
 SCENARIOS: dict[str, dict] = {
@@ -97,10 +107,55 @@ def fetch_live(hotspots: list[dict], timeout: float = 8.0) -> list[list[float]]:
     return out
 
 
-def sense(hotspots: list[dict], source: str = "scenario", scenario: str = "evening_thunderstorm") -> dict:
-    """Return {'source', 'label', 'hours', 'rain': {hotspot_id: [mm,...]}, 'note'}."""
+def fetch_historical(hotspots: list[dict], date: str, timeout: float = 15.0) -> list[list[float]]:
+    """Hourly precipitation for 48h from 00:00 IST on `date`, as archived model forecasts."""
+    start = datetime.fromisoformat(date).date()
+    end = start + timedelta(days=1)
+    params = {
+        "latitude": ",".join(str(h["lat"]) for h in hotspots),
+        "longitude": ",".join(str(h["lng"]) for h in hotspots),
+        "hourly": "precipitation",
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "timezone": "Asia/Kolkata",
+    }
+    resp = httpx.get(HISTORICAL_FORECAST_URL, params=params, timeout=timeout)
+    resp.raise_for_status()
+    payload = resp.json()
+    if isinstance(payload, dict):
+        payload = [payload]
+    out = []
+    for loc in payload:
+        values = [float(v or 0.0) for v in loc["hourly"]["precipitation"][:HOURS]]
+        out.append(values + [0.0] * (HOURS - len(values)))
+    if len(out) != len(hotspots):
+        raise ValueError("Open-Meteo returned an unexpected number of locations")
+    return out
+
+
+def sense(hotspots: list[dict], source: str = "scenario", scenario: str = "evening_thunderstorm",
+          date: str | None = None) -> dict:
+    """Return {'source', 'label', 'hours', 'start', 'rain': {hotspot_id: [mm,...]}, 'note'}."""
     hours = _hour_axis()
     note = ""
+    if source == "historical":
+        date = date or "2022-09-04"
+        try:
+            datetime.fromisoformat(date)
+            series = fetch_historical(hotspots, date)
+            start = datetime.fromisoformat(date).replace(tzinfo=IST)
+            return {
+                "source": "historical",
+                "date": date,
+                "label": f"Historical replay: {HISTORICAL_EVENTS.get(date, date)} (archived Open-Meteo forecast)",
+                "start": start.isoformat(),
+                "hours": [(start + timedelta(hours=h)).isoformat() for h in range(HOURS)],
+                "rain": {h["id"]: s for h, s in zip(hotspots, series)},
+                "note": "Replay assumes the agent ran at 00:00 IST on that date. Model rain is smoother than "
+                        "real cloudbursts, so peaks are understated.",
+            }
+        except Exception as exc:
+            note = f"Historical data unavailable ({type(exc).__name__}); fell back to scenario '{scenario}'."
     if source == "live":
         try:
             series = fetch_live(hotspots)

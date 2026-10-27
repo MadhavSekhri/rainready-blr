@@ -106,6 +106,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .basemap-label { color: #5b6f96; font-size: 11px; font-weight: 600; white-space: nowrap; text-shadow: 0 0 3px #0a1426; background: none; border: 0; box-shadow: none; }
 .basemap-label::before { display: none; }
 
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips .chip { text-align: left; }
+.chat { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.bubble { border-radius: 12px; padding: 10px 12px; max-width: 95%; white-space: pre-wrap; }
+.bubble.user { align-self: flex-end; background: #0c4a6e; color: #e0f2fe; }
+.bubble.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--line); }
+.bubble .engine { display: block; color: var(--muted); font-size: 11px; margin-top: 6px; }
+.toolcall { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: #c4b5fd; background: #1b1638; border-radius: 8px; padding: 6px 8px; margin-top: 6px; overflow-wrap: anywhere; }
+.askform { display: flex; gap: 8px; position: sticky; bottom: 0; background: var(--bg2); padding-top: 6px; }
+.askform input { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 38px; }
+.whatif { margin: 10px 20px 0; padding: 8px 12px; border-radius: 10px; background: #3b0764; color: #e9d5ff; display: flex; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid #6b21a8; }
+.whatif[hidden], label[hidden] { display: none; }
+.rep img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin-top: 6px; }
+.badge { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: #14532d; color: #bbf7d0; margin-left: 4px; }
+code { background: #0b1220; padding: 1px 5px; border-radius: 4px; }
+
 @media (max-width: 1100px) {
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .layout { grid-template-columns: 1fr; height: auto; }

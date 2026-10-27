@@ -18,7 +18,8 @@ DEFAULT_CAPACITY = {"desilting_crew": 2, "pump_unit": 1, "traffic_team": 2}
 
 
 def run(source: str = "scenario", scenario: str = "evening_thunderstorm",
-        capacity: dict | None = None, reports: list[dict] | None = None) -> dict:
+        capacity: dict | None = None, reports: list[dict] | None = None,
+        date: str | None = None, depot_overrides: dict | None = None) -> dict:
     capacity = {**DEFAULT_CAPACITY, **(capacity or {})}
     reports = reports or []
     trace = []
@@ -27,7 +28,7 @@ def run(source: str = "scenario", scenario: str = "evening_thunderstorm",
     def step(name: str, msg: str) -> None:
         trace.append({"step": name, "ms": round((time.perf_counter() - t0) * 1000), "msg": msg})
 
-    s = sense(HOTSPOTS, source, scenario)
+    s = sense(HOTSPOTS, source, scenario, date)
     wettest = max(HOTSPOTS, key=lambda h: sum(s["rain"][h["id"]][:24]))
     step("SENSE", f"{s['label']}. 48h hourly rain for {len(HOTSPOTS)} hotspots. Wettest: {wettest['name']} "
                   f"({sum(s['rain'][wettest['id']][:24]):.0f} mm/24h)." + (f" {s['note']}" if s["note"] else ""))
@@ -41,10 +42,14 @@ def run(source: str = "scenario", scenario: str = "evening_thunderstorm",
     if boosted:
         step("ASSESS", "Citizen blocked-drain reports raised priority at: " + "; ".join(h["name"] for h in boosted) + ".")
 
-    p = plan(assessed, DEPOTS, capacity)
+    p = plan(assessed, DEPOTS, capacity, depot_overrides)
     total_units = sum(capacity.values()) * len(DEPOTS)
     step("PLAN", f"{len(p['assigned']) + len(p['unassigned'])} tasks generated; {len(p['assigned'])} assigned from "
                  f"{total_units} available units across {len(DEPOTS)} depots (nearest free unit, highest priority first).")
+    if depot_overrides:
+        step("PLAN", "Capacity overrides applied: " + "; ".join(
+            f"{next(d['name'] for d in DEPOTS if d['id'] == k)} -> " + ", ".join(f"{r.replace('_', ' ')} {n}" for r, n in v.items())
+            for k, v in depot_overrides.items()) + ".")
     if p["unassigned"]:
         step("PLAN", f"{len(p['unassigned'])} task(s) left without a unit - flagged for mutual aid.")
 
@@ -65,4 +70,5 @@ def run(source: str = "scenario", scenario: str = "evening_thunderstorm",
         "min_lead_hours": min(lead_hours) if lead_hours else None,
     }
     return {"sense": {k: v for k, v in s.items() if k != "rain"}, "rain": s["rain"], "hotspots": assessed,
-            "depots": DEPOTS, "plan": p, "act": a, "kpis": kpis, "trace": trace, "capacity": capacity}
+            "depots": DEPOTS, "plan": p, "act": a, "kpis": kpis, "trace": trace, "capacity": capacity,
+            "depot_overrides": depot_overrides or {}}

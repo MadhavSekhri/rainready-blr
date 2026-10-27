@@ -22,6 +22,11 @@ Plan a new feature: automatic escalation. If a blocked-drain citizen report stay
 Review the plan, then switch to **Agent** mode: `Implement the plan.` Let Bob run `pytest -q`, fix anything that fails, then commit:
 `git commit -am "feat: escalation of stale drain reports (built with IBM Bob)"`.
 
+### 2b. Agent mode: secure the WhatsApp webhook (≈10 min) 🎥
+```
+In app/main.py, validate Twilio's X-Twilio-Signature header on /api/whatsapp when TWILIO_AUTH_TOKEN is set (reject with 403 if invalid), without adding the twilio package. Add pytest tests for a valid and an invalid signature.
+```
+
 ### 3. Agent mode: resolve-report button (≈10 min) 🎥
 ```
 In the Report tab of app/static/app.js, add a "Mark resolved" button to each open report that calls POST /api/reports/{id}/resolve, refreshes the list, and re-runs the agent so the map updates. Add an API test for the resolve endpoint.

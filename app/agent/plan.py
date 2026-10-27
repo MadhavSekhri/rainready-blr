@@ -65,9 +65,16 @@ def build_tasks(assessed: list[dict]) -> list[dict]:
     return sorted(tasks, key=lambda t: t["priority"], reverse=True)
 
 
-def allocate(tasks: list[dict], depots: list[dict], capacity: dict[str, int]) -> tuple[list[dict], list[dict]]:
-    """Greedy nearest-free-unit assignment. capacity is per depot per resource."""
-    free = {d["id"]: {r: capacity.get(r, 0) for r in RESOURCES} for d in depots}
+def allocate(tasks: list[dict], depots: list[dict], capacity: dict[str, int],
+             depot_overrides: dict[str, dict[str, int]] | None = None) -> tuple[list[dict], list[dict]]:
+    """Greedy nearest-free-unit assignment.
+
+    capacity is units per depot per resource; depot_overrides replaces it for
+    specific depots, e.g. {"D-M": {"pump_unit": 0}} for "Mahadevapura lost its pumps".
+    """
+    depot_overrides = depot_overrides or {}
+    free = {d["id"]: {r: max(0, depot_overrides.get(d["id"], {}).get(r, capacity.get(r, 0))) for r in RESOURCES}
+            for d in depots}
     assigned, unassigned = [], []
     for t in tasks:
         options = sorted(
@@ -95,9 +102,10 @@ def allocate(tasks: list[dict], depots: list[dict], capacity: dict[str, int]) ->
     return assigned, unassigned
 
 
-def plan(assessed: list[dict], depots: list[dict], capacity: dict[str, int]) -> dict:
+def plan(assessed: list[dict], depots: list[dict], capacity: dict[str, int],
+         depot_overrides: dict[str, dict[str, int]] | None = None) -> dict:
     tasks = build_tasks(assessed)
-    assigned, unassigned = allocate(tasks, depots, capacity)
+    assigned, unassigned = allocate(tasks, depots, capacity, depot_overrides)
     critical_ids = {h["id"] for h in assessed if h["level"] == "Critical"}
     covered = set()
     for hid in critical_ids:
@@ -105,9 +113,18 @@ def plan(assessed: list[dict], depots: list[dict], capacity: dict[str, int]) -> 
         ok = [a for a in assigned if a["hotspot_id"] == hid and a["status"] == "Before peak"]
         if mine and len(ok) == len(mine):
             covered.add(hid)
+    depot_overrides = depot_overrides or {}
+    spare = {}
+    for d in depots:
+        spare[d["id"]] = {}
+        for r in RESOURCES:
+            total = max(0, depot_overrides.get(d["id"], {}).get(r, capacity.get(r, 0)))
+            used = sum(1 for a in assigned if a["depot_id"] == d["id"] and a["resource"] == r)
+            spare[d["id"]][r] = total - used
     return {
         "assigned": assigned,
         "unassigned": unassigned,
+        "spare": spare,
         "critical_total": len(critical_ids),
         "critical_covered": len(covered),
     }

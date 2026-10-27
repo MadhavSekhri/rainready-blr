@@ -69,7 +69,32 @@ async function loadScenarios() {
   $("#scenario").innerHTML = Object.entries(s).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("");
   $("#scenario").value = "evening_thunderstorm";
 }
-$("#source").onchange = () => ($("#scenarioWrap").style.opacity = $("#source").value === "live" ? .5 : 1);
+async function loadEvents() {
+  const ev = await (await fetch("/api/historical-events")).json();
+  $("#date").innerHTML = Object.entries(ev).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("");
+}
+$("#source").onchange = () => {
+  const src = $("#source").value;
+  $("#scenarioWrap").hidden = src === "historical";
+  $("#dateWrap").hidden = src !== "historical";
+  $("#scenarioWrap").style.opacity = src === "live" ? .5 : 1;
+};
+let depotOverrides = {};
+function settingsBody() {
+  return {
+    source: $("#source").value, scenario: $("#scenario").value, date: $("#source").value === "historical" ? $("#date").value : null,
+    desilting_crew: +$("#desilting_crew").value, pump_unit: +$("#pump_unit").value, traffic_team: +$("#traffic_team").value,
+    depot_overrides: depotOverrides,
+  };
+}
+function showWhatIf(run) {
+  const ov = run.depot_overrides || {};
+  const names = Object.fromEntries(run.depots.map((d) => [d.id, d.name]));
+  const parts = Object.entries(ov).map(([d, res]) => `${names[d] || d}: ` + Object.entries(res).map(([r, n]) => `${r.replace("_", " ")} ${n}`).join(", "));
+  $("#whatif").hidden = !parts.length;
+  $("#whatifText").textContent = parts.length ? "What-if active — " + parts.join(" · ") : "";
+}
+$("#whatifReset").onclick = () => { depotOverrides = {}; showWhatIf({ depot_overrides: {}, depots: [] }); runAgent(); };
 
 // ---------- rendering ----------
 function rainBars(series) {
@@ -174,21 +199,20 @@ async function renderReports() {
       .bindTooltip(`${r.id} · ${r.type.replace("_", " ")} ×${r.count}<br>${esc(r.routed_to)}`).addTo(layers.reports);
   });
   $("#reports").innerHTML = reps.slice().reverse().map((r) => `
-    <div class="rep"><b>${r.id}</b> · ${esc(r.type.replace("_", " "))} · ×${r.count} · <i>${esc(r.status)}</i>
-      <div>${esc(r.texts[r.texts.length - 1])}</div><div class="meta">Routed to ${esc(r.routed_to)}</div></div>`).join("");
+    <div class="rep"><b>${r.id}</b> · ${esc(r.type.replace("_", " "))} · ×${r.count} · <i>${esc(r.status)}</i>${r.channel === "whatsapp" ? '<span class="badge">WhatsApp</span>' : ""}
+      <div>${esc(r.texts[r.texts.length - 1])}</div><div class="meta">Routed to ${esc(r.routed_to)}</div>
+      ${(r.photos || []).filter((p) => p.startsWith("/uploads/")).slice(-1).map((p) => `<img src="${esc(p)}" alt="Citizen photo for ${r.id}">`).join("")}</div>`).join("");
 }
 
 async function runAgent() {
   const btn = $("#runBtn");
   btn.disabled = true; btn.textContent = "Running…";
-  const body = {
-    source: $("#source").value, scenario: $("#scenario").value,
-    desilting_crew: +$("#desilting_crew").value, pump_unit: +$("#pump_unit").value, traffic_team: +$("#traffic_team").value,
-  };
+  const body = settingsBody();
   try {
     const res = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(await res.text());
-    render(await res.json());
+    const run = await res.json();
+    render(run); showWhatIf(run);
     switchTab("agent");
   } catch (e) {
     $("#brief").textContent = "Run failed: " + e.message;
@@ -201,6 +225,11 @@ $("#runBtn").onclick = runAgent;
 $("#reportForm").onsubmit = async (e) => {
   e.preventDefault();
   const body = { lat: +$("#r-lat").value, lng: +$("#r-lng").value, text: $("#r-text").value };
+  const file = $("#r-photo").files[0];
+  if (file) {
+    if (file.size > 3e6) { $("#reportResult").textContent = "Photo must be under 3 MB."; return; }
+    body.photo = await new Promise((ok, fail) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = fail; fr.readAsDataURL(file); });
+  }
   const res = await fetch("/api/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const r = await res.json();
   $("#reportResult").innerHTML = res.ok
@@ -209,7 +238,40 @@ $("#reportForm").onsubmit = async (e) => {
         : `✅ Ticket <b>${r.id}</b> created · classified as <b>${esc(r.type.replace("_", " "))}</b> · routed to <b>${esc(r.routed_to)}</b>`)
       + "<br><small>Re-run the agent to see how it changes the plan.</small>"
     : "Could not submit: " + esc(JSON.stringify(r.detail || r));
+  $("#r-photo").value = "";
   renderReports();
 };
 
-loadScenarios().then(runAgent);
+// ---------- Ask RainReady (copilot) ----------
+function addBubble(cls, html) {
+  const d = document.createElement("div");
+  d.className = `bubble ${cls}`; d.innerHTML = html;
+  $("#chat").appendChild(d); d.scrollIntoView({ behavior: "smooth", block: "end" });
+  return d;
+}
+async function ask(question) {
+  addBubble("user", esc(question));
+  const wait = addBubble("bot", "Thinking — calling agent tools…");
+  try {
+    const res = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...settingsBody(), question }) });
+    if (!res.ok) throw new Error(await res.text());
+    const out = await res.json();
+    const calls = out.steps.map((s) => `<div class="toolcall">🔧 ${esc(s.tool)}(${esc(JSON.stringify(s.args))})</div>`).join("");
+    wait.innerHTML = `${calls}<div style="margin-top:8px">${esc(out.answer)}</div><span class="engine">${esc(out.engine)}</span>`;
+    if (out.run) {
+      depotOverrides = out.run.depot_overrides || {};
+      const s = out.run.sense;
+      if (s.source === "historical") { $("#source").value = "historical"; $("#date").value = s.date; }
+      else if (s.source === "scenario" && s.scenario) { $("#source").value = "scenario"; $("#scenario").value = s.scenario; }
+      $("#source").onchange();
+      const c = out.run.capacity; ["desilting_crew", "pump_unit", "traffic_team"].forEach((k) => ($("#" + k).value = c[k]));
+      render(out.run); showWhatIf(out.run);
+    }
+  } catch (e) {
+    wait.textContent = "Sorry, that failed: " + e.message;
+  }
+}
+$("#askForm").onsubmit = (e) => { e.preventDefault(); const q = $("#askInput").value.trim(); if (q) { $("#askInput").value = ""; ask(q); } };
+document.querySelectorAll("#askChips .chip").forEach((b) => (b.onclick = () => ask(b.textContent)));
+
+Promise.all([loadScenarios(), loadEvents()]).then(runAgent);

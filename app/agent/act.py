@@ -12,11 +12,18 @@ from zoneinfo import ZoneInfo
 IST = ZoneInfo("Asia/Kolkata")
 
 
+_BASE: datetime | None = None  # start of a historical replay window; None = now
+
+
 def _clock(offset_h: int | None) -> str:
     if offset_h is None:
         return "later today"
-    t = datetime.now(IST).replace(minute=0, second=0, microsecond=0) + timedelta(hours=offset_h)
-    day = "today" if t.date() == datetime.now(IST).date() else "tomorrow"
+    now = datetime.now(IST).replace(minute=0, second=0, microsecond=0)
+    base = _BASE or now
+    t = base + timedelta(hours=offset_h)
+    if _BASE is not None:
+        return t.strftime("%I %p, %d %b %Y").lstrip("0")
+    day = "today" if t.date() == now.date() else "tomorrow"
     return f"{t.strftime('%I %p').lstrip('0')} {day}"
 
 
@@ -72,6 +79,8 @@ def situation_brief(assessed: list[dict], plan: dict, sense_meta: dict) -> str:
 
 
 def act(assessed: list[dict], plan: dict, sense_meta: dict) -> dict:
+    global _BASE
+    _BASE = datetime.fromisoformat(sense_meta["start"]) if sense_meta.get("source") == "historical" else None
     at_risk = [h for h in assessed if h["level"] in ("Warning", "Critical")]
     return {
         "alerts": [resident_alert(h) for h in at_risk],

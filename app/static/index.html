@@ -23,7 +23,11 @@
       <select id="source">
         <option value="scenario">Scenario</option>
         <option value="live">Live forecast (Open-Meteo)</option>
+        <option value="historical">Historical replay (real storms)</option>
       </select>
+    </label>
+    <label id="dateWrap" hidden>Storm
+      <select id="date"></select>
     </label>
     <label id="scenarioWrap">Scenario
       <select id="scenario"></select>
@@ -35,6 +39,7 @@
   </div>
 </header>
 
+<div id="whatif" class="whatif" hidden><span id="whatifText"></span><button id="whatifReset" class="chip">Reset what-if</button></div>
 <section class="kpis" id="kpis">
   <div class="kpi crit"><span class="v" id="k-crit">–</span><span class="l">Critical hotspots</span></div>
   <div class="kpi warn"><span class="v" id="k-warn">–</span><span class="l">Warning hotspots</span></div>
@@ -64,6 +69,7 @@
   <aside class="panel">
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="agent">Agent</button>
+      <button class="tab" data-tab="ask">Ask ✦</button>
       <button class="tab" data-tab="dispatch">Dispatch</button>
       <button class="tab" data-tab="alerts">Alerts</button>
       <button class="tab" data-tab="report">Report</button>
@@ -79,6 +85,26 @@
       <ol class="trace" id="trace"></ol>
       <h3 class="sec">Top hotspots</h3>
       <div id="hotlist" class="hotlist"></div>
+    </div>
+
+    <div class="tabpane" id="tab-ask">
+      <div class="card brief">
+        <h3>Ask RainReady</h3>
+        <p class="hint" style="margin:0">Ask what-if questions in plain English. The copilot calls the same agent tools (re-plan, inspect hotspot, list tasks, draft alert) and updates the map.</p>
+      </div>
+      <div class="chips" id="askChips">
+        <button class="chip">What if Bommanahalli depot loses its pumps?</button>
+        <button class="chip">What if Mahadevapura loses 1 desilting crew and the deluge hits?</button>
+        <button class="chip">Why is Silk Board critical?</button>
+        <button class="chip">Which tasks have no unit?</button>
+        <button class="chip">Draft a Kannada alert for KR Circle Underpass</button>
+        <button class="chip">Replay the September 2022 ORR floods</button>
+      </div>
+      <div id="chat" class="chat"></div>
+      <form id="askForm" class="askform">
+        <input id="askInput" maxlength="500" placeholder="e.g. What if we only have 1 traffic team per depot?" autocomplete="off">
+        <button class="primary" type="submit">Ask</button>
+      </form>
     </div>
 
     <div class="tabpane" id="tab-dispatch">
@@ -106,7 +132,11 @@
         <label>What do you see? (English / ಕನ್ನಡ / Hinglish)
           <textarea id="r-text" rows="3" placeholder="e.g. Drain near 4th cross fully blocked with plastic">Drain near 4th cross fully blocked with plastic</textarea>
         </label>
+        <label>Photo (optional)
+          <input id="r-photo" type="file" accept="image/jpeg,image/png,image/webp">
+        </label>
         <button class="primary" type="submit">Submit report</button>
+        <p class="hint">Same intake also works over WhatsApp: point a Twilio WhatsApp number at <code>/api/whatsapp</code>.</p>
         <div id="reportResult" class="result"></div>
       </form>
       <h3 class="sec">Open reports</h3>

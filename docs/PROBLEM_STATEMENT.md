@@ -32,7 +32,7 @@ RainReady BLR is an **agentic early-action system** for ward and zonal control r
 
 ## 3. Prototype
 
-The prototype is a working FastAPI service with a Leaflet dashboard. It shows a live agent trace, a risk map with dispatch lines, a dispatch plan, bilingual alerts and a report form. It runs fully offline (scenario data and a schematic basemap) and has 12 automated tests. It needs no API keys to run.
+The prototype is a working FastAPI service with a Leaflet dashboard. It shows a live agent trace, a risk map with dispatch lines, a dispatch plan, bilingual alerts and a report form, plus the Ask RainReady copilot, historical replays and WhatsApp intake. It runs fully offline (scenario data and a schematic basemap) and has 31 automated tests. It needs no API keys to run.
 
 ## 4. Impact: one measurable outcome
 

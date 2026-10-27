@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RainReady BLR — Flood early-action agent</title>
+  <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 3c5 7 9 11.5 9 16.5A9 9 0 0 1 7 19.5C7 14.5 11 10 16 3z" fill="#38bdf8"/><path d="M11 20.5a5 5 0 0 0 5 5" stroke="#0b1220" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <h1>RainReady <span>BLR</span></h1>
+      <p>Agentic flood early-action for Bengaluru wards</p>
+    </div>
+  </div>
+  <div class="controls">
+    <label>Rain data
+      <select id="source">
+        <option value="scenario">Scenario</option>
+        <option value="live">Live forecast (Open-Meteo)</option>
+      </select>
+    </label>
+    <label id="scenarioWrap">Scenario
+      <select id="scenario"></select>
+    </label>
+    <label title="Per depot">Desilting crews <input id="desilting_crew" type="number" min="0" max="10" value="2"></label>
+    <label title="Per depot">Pumps <input id="pump_unit" type="number" min="0" max="10" value="1"></label>
+    <label title="Per depot">Traffic teams <input id="traffic_team" type="number" min="0" max="10" value="2"></label>
+    <button id="runBtn" class="primary">▶ Run agent</button>
+  </div>
+</header>
+
+<section class="kpis" id="kpis">
+  <div class="kpi crit"><span class="v" id="k-crit">–</span><span class="l">Critical hotspots</span></div>
+  <div class="kpi warn"><span class="v" id="k-warn">–</span><span class="l">Warning hotspots</span></div>
+  <div class="kpi"><span class="v" id="k-units">–</span><span class="l">Units dispatched</span></div>
+  <div class="kpi good"><span class="v" id="k-cover">–</span><span class="l">Critical spots covered before peak</span></div>
+  <div class="kpi"><span class="v" id="k-lead">–</span><span class="l">Lead time to first peak</span></div>
+  <div class="kpi"><span class="v" id="k-ontime">–</span><span class="l">Tasks arriving on time</span></div>
+</section>
+
+<main class="layout">
+  <section class="mapwrap">
+    <div id="map"></div>
+    <div class="maptools">
+      <button id="basemapBtn" class="chip">Basemap: auto</button>
+      <button id="reportModeBtn" class="chip">📍 Click map to report</button>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--crit)"></i>Critical</span>
+      <span><i class="dot" style="background:var(--warn)"></i>Warning</span>
+      <span><i class="dot" style="background:var(--watch)"></i>Watch</span>
+      <span><i class="dot" style="background:var(--low)"></i>Low</span>
+      <span><i class="sq"></i>Depot</span>
+      <span><i class="tri"></i>Citizen report</span>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="agent">Agent</button>
+      <button class="tab" data-tab="dispatch">Dispatch</button>
+      <button class="tab" data-tab="alerts">Alerts</button>
+      <button class="tab" data-tab="report">Report</button>
+    </nav>
+
+    <div class="tabpane active" id="tab-agent">
+      <div class="card brief">
+        <h3>Control-room brief</h3>
+        <p id="brief">Press <b>Run agent</b> to sense, assess, plan and act.</p>
+        <small id="sourceNote"></small>
+      </div>
+      <h3 class="sec">Agent trace</h3>
+      <ol class="trace" id="trace"></ol>
+      <h3 class="sec">Top hotspots</h3>
+      <div id="hotlist" class="hotlist"></div>
+    </div>
+
+    <div class="tabpane" id="tab-dispatch">
+      <h3 class="sec">Dispatch plan <small>(highest priority first)</small></h3>
+      <div id="dispatch" class="dispatch"></div>
+      <h3 class="sec">Unassigned — needs mutual aid</h3>
+      <div id="unassigned" class="dispatch"></div>
+    </div>
+
+    <div class="tabpane" id="tab-alerts">
+      <h3 class="sec">Resident alerts <small>English + ಕನ್ನಡ</small></h3>
+      <div id="alerts"></div>
+      <h3 class="sec">Commuter advisories</h3>
+      <div id="advisories"></div>
+    </div>
+
+    <div class="tabpane" id="tab-report">
+      <h3 class="sec">Report a problem</h3>
+      <form id="reportForm" class="card form">
+        <p class="hint">Click the map (📍 mode) to set the location, or type coordinates.</p>
+        <div class="row">
+          <label>Lat <input id="r-lat" type="number" step="0.0001" value="12.9352" required></label>
+          <label>Lng <input id="r-lng" type="number" step="0.0001" value="77.6245" required></label>
+        </div>
+        <label>What do you see? (English / ಕನ್ನಡ / Hinglish)
+          <textarea id="r-text" rows="3" placeholder="e.g. Drain near 4th cross fully blocked with plastic">Drain near 4th cross fully blocked with plastic</textarea>
+        </label>
+        <button class="primary" type="submit">Submit report</button>
+        <div id="reportResult" class="result"></div>
+      </form>
+      <h3 class="sec">Open reports</h3>
+      <div id="reports" class="reports"></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="foot">
+  Made for the IBM Bobathon: Build for Bengaluru · Hotspot locations are approximate demo data · Live rain: Open-Meteo
+</footer>
+
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/basemap.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

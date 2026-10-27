@@ -1,0 +1,43 @@
+{
+  "_note": "Approximate coordinates of commonly reported Bengaluru waterlogging spots, compiled for demo purposes. Replace with the official GBA/BBMP vulnerable-spot list for production use. base_vulnerability is a 0-1 prior (history of flooding, low elevation, drain capacity).",
+  "hotspots": [
+    {"id": "HS01", "name": "Silk Board Junction", "lat": 12.9172, "lng": 77.6229, "zone": "Bommanahalli", "type": "junction", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.85},
+    {"id": "HS02", "name": "Bellandur ORR (Ecospace)", "lat": 12.9260, "lng": 77.6762, "zone": "Mahadevapura", "type": "arterial", "catchment": "Bellandur lake", "base_vulnerability": 0.9},
+    {"id": "HS03", "name": "Rainbow Drive, Sarjapur Road", "lat": 12.9119, "lng": 77.6863, "zone": "Mahadevapura", "type": "low_lying_layout", "catchment": "Bellandur lake", "base_vulnerability": 0.88},
+    {"id": "HS04", "name": "Varthur Kodi", "lat": 12.9406, "lng": 77.7475, "zone": "Mahadevapura", "type": "lake_outflow", "catchment": "Varthur lake", "base_vulnerability": 0.75},
+    {"id": "HS05", "name": "Marathahalli Bridge", "lat": 12.9569, "lng": 77.7011, "zone": "Mahadevapura", "type": "junction", "catchment": "Bellandur lake", "base_vulnerability": 0.65},
+    {"id": "HS06", "name": "Mahadevapura ORR", "lat": 12.9888, "lng": 77.6895, "zone": "Mahadevapura", "type": "arterial", "catchment": "Kodigehalli valley", "base_vulnerability": 0.7},
+    {"id": "HS07", "name": "KR Puram Railway Underpass", "lat": 13.0076, "lng": 77.6955, "zone": "Mahadevapura", "type": "underpass", "catchment": "KR Puram lake", "base_vulnerability": 0.72},
+    {"id": "HS08", "name": "Hebbal Flyover Loop", "lat": 13.0358, "lng": 77.5970, "zone": "Yelahanka", "type": "junction", "catchment": "Hebbal valley", "base_vulnerability": 0.7},
+    {"id": "HS09", "name": "Manyata Tech Park Gate", "lat": 13.0475, "lng": 77.6206, "zone": "East", "type": "arterial", "catchment": "Hebbal valley", "base_vulnerability": 0.68},
+    {"id": "HS10", "name": "Kendriya Vihar, Yelahanka", "lat": 13.1007, "lng": 77.5963, "zone": "Yelahanka", "type": "low_lying_layout", "catchment": "Yelahanka lake", "base_vulnerability": 0.78},
+    {"id": "HS11", "name": "Koramangala ST Bed", "lat": 12.9352, "lng": 77.6245, "zone": "South", "type": "low_lying_layout", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.8},
+    {"id": "HS12", "name": "HSR Layout Sector 6", "lat": 12.9116, "lng": 77.6474, "zone": "Bommanahalli", "type": "low_lying_layout", "catchment": "Agara lake", "base_vulnerability": 0.74},
+    {"id": "HS13", "name": "Agara Junction", "lat": 12.9230, "lng": 77.6460, "zone": "Bommanahalli", "type": "junction", "catchment": "Agara lake", "base_vulnerability": 0.62},
+    {"id": "HS14", "name": "Madiwala Check Post", "lat": 12.9226, "lng": 77.6174, "zone": "South", "type": "junction", "catchment": "Madiwala lake", "base_vulnerability": 0.6},
+    {"id": "HS15", "name": "Shantinagar Bus Depot", "lat": 12.9568, "lng": 77.5970, "zone": "South", "type": "low_lying_layout", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.66},
+    {"id": "HS16", "name": "Okalipuram Underpass", "lat": 12.9810, "lng": 77.5640, "zone": "West", "type": "underpass", "catchment": "Vrishabhavathi valley", "base_vulnerability": 0.7},
+    {"id": "HS17", "name": "KR Circle Underpass", "lat": 12.9767, "lng": 77.5880, "zone": "East", "type": "underpass", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.82},
+    {"id": "HS18", "name": "Anil Kumble Circle", "lat": 12.9758, "lng": 77.6013, "zone": "East", "type": "junction", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.55},
+    {"id": "HS19", "name": "Hosa Road Junction", "lat": 12.8808, "lng": 77.6590, "zone": "Bommanahalli", "type": "arterial", "catchment": "Hosa Road drain", "base_vulnerability": 0.6},
+    {"id": "HS20", "name": "Electronic City Phase 1", "lat": 12.8452, "lng": 77.6602, "zone": "Bommanahalli", "type": "arterial", "catchment": "Hebbagodi drain", "base_vulnerability": 0.5},
+    {"id": "HS21", "name": "Bommanahalli Junction", "lat": 12.9030, "lng": 77.6240, "zone": "Bommanahalli", "type": "junction", "catchment": "Madiwala lake", "base_vulnerability": 0.6},
+    {"id": "HS22", "name": "Puttenahalli, JP Nagar", "lat": 12.8935, "lng": 77.5850, "zone": "South", "type": "lake_outflow", "catchment": "Puttenahalli lake", "base_vulnerability": 0.52},
+    {"id": "HS23", "name": "Kengeri Satellite Town", "lat": 12.9081, "lng": 77.4826, "zone": "RR Nagar", "type": "low_lying_layout", "catchment": "Vrishabhavathi valley", "base_vulnerability": 0.55},
+    {"id": "HS24", "name": "Nayandahalli Junction", "lat": 12.9420, "lng": 77.5240, "zone": "RR Nagar", "type": "junction", "catchment": "Vrishabhavathi valley", "base_vulnerability": 0.6},
+    {"id": "HS25", "name": "Malleshwaram 18th Cross", "lat": 13.0050, "lng": 77.5700, "zone": "West", "type": "arterial", "catchment": "Hebbal valley", "base_vulnerability": 0.45},
+    {"id": "HS26", "name": "Kalyan Nagar", "lat": 13.0280, "lng": 77.6390, "zone": "East", "type": "low_lying_layout", "catchment": "Hebbal valley", "base_vulnerability": 0.5},
+    {"id": "HS27", "name": "Sai Layout, Horamavu", "lat": 13.0270, "lng": 77.6600, "zone": "Mahadevapura", "type": "low_lying_layout", "catchment": "Horamavu lake", "base_vulnerability": 0.86},
+    {"id": "HS28", "name": "Hope Farm, Whitefield", "lat": 12.9840, "lng": 77.7500, "zone": "Mahadevapura", "type": "junction", "catchment": "Varthur lake", "base_vulnerability": 0.5},
+    {"id": "HS29", "name": "Domlur Flyover", "lat": 12.9610, "lng": 77.6380, "zone": "East", "type": "junction", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.55},
+    {"id": "HS30", "name": "Ejipura Signal", "lat": 12.9440, "lng": 77.6250, "zone": "South", "type": "low_lying_layout", "catchment": "Koramangala-Challaghatta valley", "base_vulnerability": 0.72}
+  ],
+  "depots": [
+    {"id": "D-E", "name": "East depot (Indiranagar)", "lat": 12.9719, "lng": 77.6412},
+    {"id": "D-S", "name": "South depot (Jayanagar)", "lat": 12.9250, "lng": 77.5838},
+    {"id": "D-M", "name": "Mahadevapura depot", "lat": 12.9700, "lng": 77.7150},
+    {"id": "D-B", "name": "Bommanahalli depot", "lat": 12.8990, "lng": 77.6400},
+    {"id": "D-W", "name": "West depot (Vijayanagar)", "lat": 12.9700, "lng": 77.5350},
+    {"id": "D-Y", "name": "Yelahanka depot", "lat": 13.0700, "lng": 77.5950}
+  ]
+}

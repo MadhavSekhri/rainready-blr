@@ -24,7 +24,11 @@ RainReady BLR is an **agentic early-action system** for ward and zonal control r
 3. **Plan:** turns risk into the right tasks for each kind of location (pump and traffic team for underpasses, desilting for lake outflows, and so on). It allocates the nearest free crew from 6 depots, highest priority first, and checks whether each crew **arrives before the peak**. Tasks it can't cover go to a mutual-aid list.
 4. **Act:** produces SMS/WhatsApp-ready resident alerts in **English and Kannada**, timed 3 hours before the peak, plus commuter advisories and a control-room brief. The brief can optionally be written by IBM Granite on watsonx.ai.
 
-**Citizen intake:** reports in English, Kannada or Hinglish are classified (blocked drain, waterlogging, tree fall, electrical hazard). Electrical hazards are always prioritised. Duplicates within 150 m and 6 hours are merged, and each report is routed to the right agency (GBA SWD, Traffic Police, Forest cell or BESCOM). Reports feed straight into the next risk run.
+**Ask RainReady:** a tool-calling copilot (IBM Granite on watsonx.ai, with an offline fallback) answers what-if questions such as "What if Bommanahalli depot loses its pumps?" by re-planning and reporting before/after numbers, hotspots losing cover and which depot can lend units.
+
+**Historical replay:** the agent can be replayed on real Bengaluru flood days (4–5 Sep 2022, 21–22 Oct 2024, 18–19 May 2025) using archived model forecasts.
+
+**Citizen intake:** reports in English, Kannada or Hinglish are classified (blocked drain, waterlogging, tree fall, electrical hazard). Electrical hazards are always prioritised. Reports can come from the web or WhatsApp, with photos. Duplicates within 150 m and 6 hours are merged, and each report is routed to the right agency (GBA SWD, Traffic Police, Forest cell or BESCOM). Reports feed straight into the next risk run.
 
 ## 3. Prototype
 

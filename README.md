@@ -34,6 +34,8 @@ uvicorn app.main:app --reload
 
 Or with Docker: `docker build -t rainready . && docker run -p 8000:8000 rainready`
 
+Deploy a live link: see [`docs/DEPLOY.md`](docs/DEPLOY.md) (IBM Cloud Code Engine or one-click Render).
+
 Run the tests: `pytest -q` (31 tests: risk model, planner and what-if overrides, copilot routing and Granite tool loop, historical replay, SQLite persistence, photo upload, WhatsApp webhook, API).
 
 Reports are stored in SQLite at `data/rainready.db` (override with `RAINREADY_DB`); photos go to `data/uploads/`.

@@ -258,6 +258,7 @@ async function ask(question) {
     const out = await res.json();
     const calls = out.steps.map((s) => `<div class="toolcall">🔧 ${esc(s.tool)}(${esc(JSON.stringify(s.args))})</div>`).join("");
     wait.innerHTML = `${calls}<div style="margin-top:8px">${esc(out.answer)}</div><span class="engine">${esc(out.engine)}</span>`;
+    const pane = $("#tab-ask"); pane.scrollTop = pane.scrollHeight;
     if (out.run) {
       depotOverrides = out.run.depot_overrides || {};
       const s = out.run.sense;

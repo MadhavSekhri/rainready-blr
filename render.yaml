@@ -1,0 +1,12 @@
+# One-click deploy: https://render.com/deploy?repo=https://github.com/MadhavSekhri/rainready-blr
+services:
+  - type: web
+    name: rainready-blr
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: WATSONX_APIKEY
+        sync: false
+      - key: WATSONX_PROJECT_ID
+        sync: false

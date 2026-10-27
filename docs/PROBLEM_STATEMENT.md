@@ -2,7 +2,7 @@
 
 **Track:** 01 · Smarter Streets, Better Living (neighbourhood flood alerts, pothole/drain issue tracking)
 **Team:** Madhav Sekhri
-**Repository:** <add GitHub link>
+**Repository:** https://github.com/MadhavSekhri/rainready-blr
 **Demo video:** <add YouTube/Drive link>
 
 ## 1. Problem: who faces it, and what needs to improve?
